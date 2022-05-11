@@ -1,0 +1,173 @@
+---
+title: "Inaccessible analysis"
+output: html_document
+---
+inaccessible plot Nitrogen 2017 Hydric
+```{r pressure, echo=FALSE}
+rm(list=ls())
+package<-function(x, repos="http://cran.r-project.org", ...){
+  x<-as.character(match.call()[[2]])
+  if (!require(x,character.only=TRUE)){
+    install.packages(pkgs=x, repos=repos, ...)
+    require(x,character.only=TRUE)
+  }
+}
+
+package(Hmisc)  
+package(ggsignif)
+package(ggplot)
+package(ggthemes)
+package(Hmisc) 
+package(ggpubr)
+package(cowplot)
+package(reshape)
+package(replace)
+
+
+setwd("C://Users//Cameron M//Desktop//R working folder")
+
+E17<-read.csv("2017EXT.csv")
+V172<-read.csv("2017VAC.csv")
+H17<-read.csv("2017H2O.csv")
+V172<-V172[-c(1:255),]
+E17<-E17[E17$Site!="Mesic",]
+E17<-E17[E17$Site!="Xeric",]
+E17<-E17[E17$treatment!=" ",]
+E17<-E17[E17$treatment!="Lysim",]
+E17<-E17[E17$treatment!="Lysim 2",]
+E17<-E17[E17$treatment!="Lysim 3",]
+E17<-E17[E17$treatment!="Lysim 4",]
+E17<-E17[E17$treatment!="Snowfence",]
+E17<-E17[E17$treatment!="Control",]
+
+
+H17<-H17[H17$treatment!="Mesic",]
+H17<-H17[H17$treatment!="Xeric",]
+H17<-H17[H17$Plot!=" ",]
+#H17<-H17[H17$Plot!="Lysim",]
+H17<-H17[H17$Plot!="Lysim",]
+H17<-H17[H17$Plot!="Lysim 2",]
+H17<-H17[H17$Plot!="Lysim 3",]
+H17<-H17[H17$Plot!="Lysim 4",]
+
+
+V172<-V172[V172$Site!="Mesic",]
+V172<-V172[V172$Site!="Xeric",]
+V172<-V172[V172$treatment!=" ",]
+V172<-V172[V172$treatment!="Lysim",]
+V172<-V172[V172$treatment!="Lysim 2",]
+V172<-V172[V172$treatment!="Lysim 3",]
+V172<-V172[V172$treatment!="Lysim 4",]
+V172<-V172[V172$treatment!="Lysim 5",]
+#V172<-V172[V172$treatment!="Ancillary",]
+V172<-V172[V172$treatment!="Control",]
+V172<-V172[V172$treatment!="Snowfence",]
+V172<-V172[V172$treatment!="Fertalized past",]
+#V172$treatment<-"permanent"
+
+
+
+
+E17$NH4.K2SO4<- ((((E17$NH4.K2SO4*E17$Dry.mass.in.5g.wet)/25)/14.0067)*1000)
+H17$NH4.H2O <- ((((H17$NH4.H2O*H17$Dry.soil.mass)/25)/14.0067)*1000)
+
+E17$NO3.K2SO4<- ((((E17$NO3.K2SO4*E17$Dry.mass.in.5g.wet)/25)/14.0067)*1000)
+H17$NO3.H2O <- ((((H17$NO3.H2O*H17$Dry.soil.mass)/25)/14.0067)*1000)
+
+E17$TFPA<- (((E17$TFPA*E17$Dry.mass.in.5g.wet)/(25+(5-E17$Dry.mass.in.5g.wet))))
+H17$TFPA.H2O <- (H17$TFPA.H2O*H17$Dry.soil.mass/(25+(5-H17$Dry.soil.mass)))
+
+
+V172$NH4.vac <- (V172$NH4.vac*1000)/14.0067
+V172$NO3.vac<- (V172$NO3.vac*1000)/14.0067
+V172$TFPA.vac<- (V172$TFPA.vac/1000)
+
+
+E17<-E17[9:40,]
+
+E17$SN <- rowSums(E17[,c("NH4.K2SO4","NO3.K2SO4", "TFPA")],na.rm = TRUE)
+H17$SN <- rowSums(H17[,c("NH4.H2O","NO3.H2O", "TFPA.H2O")],na.rm = TRUE)
+V172$SN <- rowSums(V172[,c("NH4.vac","NO3.vac", "TFPA.vac")],na.rm = TRUE)
+  
+H17$adsorb.NH4<-E17$NH4.K2SO4-H17$NH4.H2O
+
+
+
+
+K2SO4_17<- data.frame(x=E17$Date,y= E17$SN,B=E17$treatment)
+H2O_17<-data.frame(x=H17$Site,y= H17$SN,B=H17$Plot)
+Vac_17<-data.frame(x=V172$Date,y= V172$SN,B=V172$treatment)
+
+
+cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
+C1<-c("palevioletred","darkolivegreen3","deepskyblue")
+C2<-c("palevioletred4","darkolivegreen4","deepskyblue3")
+
+#SHouldnt need to modify anything beyond here besides graphical paramiters. 
+
+ZNH<-melt(list(K2SO4_17=K2SO4_17,H2O_17=H2O_17,Vac_17=Vac_17, id.vars=c("x","B")))
+ZNH$Z<-0
+ZNH$Date<-as.Date(ZNH$x, "%m/%d/%Y")
+ZNH$Date2<-format(ZNH$Date, format="%m-%d")
+colnames(ZNH)[colnames(ZNH)=="L1"] <- "Sample type"
+colnames(ZNH)[colnames(ZNH)=="A"] <- "Site"
+#ZNH<-ZNH[ZNH$'Sample type'!="id.vars",]
+ZNH$Date2 <- as.Date(ZNH$Date2,format="%m-%d" )
+ZNH$value <- as.character(as.numeric(ZNH$value))
+
+drops <- c("x","Date","variable","B")
+ZNH2<-ZNH[ , !(names(ZNH) %in% drops)]
+library(dplyr)
+attach(ZNH2)
+ZNH2$value<-as.numeric(as.character(ZNH2$value))
+ZNH2<-ZNH2[ZNH2$`Sample type`!="id.vars",]
+ agg_data = ZNH2 %>%
+   mutate(Type = `Sample type`) %>% 
+   group_by(Date2, Type) %>%
+   summarize(mean_value = mean(value, na.rm = TRUE),
+             se = sqrt(var(value, na.rm = TRUE) / sum(!is.na(value)))) %>%
+   filter(Type != "id.vars") %>%
+   ungroup() %>%
+   mutate(Type = factor(Type),
+          Type = reorder(Type, -mean_value, na.rm = TRUE))
+
+Hydric2017<-ggplot(agg_data, aes(x = Date2, y = mean_value, fill = Type)) +
+  geom_area(aes(fill=Type),position = 'identity') +
+  geom_line(aes(color = Type), lwd = 2) +
+  geom_errorbar(aes(ymin = mean_value - se, ymax = mean_value + se), lwd = 1, width = 1) +
+  geom_point(shape = 16,aes(color=Type),lwd=6)+
+  #scale_y_continuous(expand = c(0, 0))+
+  guides(fill=guide_legend(title= "Legend"))+
+  theme_bw()+
+  scale_fill_manual(name="Type",
+                         breaks=c("K2SO4_17", "H2O_17", "Vac_17"),
+                         labels=c("Adsorbed", "Inaccessible", "Mobile"),values=c("H2O_17"="palevioletred","K2SO4_17"="darkolivegreen3","Vac_17"="deepskyblue"))+
+  scale_colour_manual(name="Type",
+                         breaks=c("K2SO4_17", "H2O_17", "Vac_17"),
+                         labels=c(expression(paste("K"[2],"SO"[4])), expression(paste("H"[2],"O")), "Pore water"),values=c("H2O_17"="palevioletred4","K2SO4_17"="darkolivegreen4","Vac_17"="deepskyblue3"))+
+  xlab("")+
+  ylab("")+
+  guides(color = guide_legend(title= "Matrix" ),
+            fill = guide_legend(title= "N Distribution",override.aes = list(color = NA)))+
+  coord_cartesian(ylim=c(0,260))+
+  theme(legend.direction = 'vertical', 
+        legend.key = element_rect(size=2),
+        legend.key.size = unit(3, 'lines'),
+        panel.grid.major = element_blank(), 
+        legend.title=element_text(size=25,colour='black'),
+        panel.grid.minor = element_blank(),
+        legend.text=element_text(size=20),
+        axis.title.y= element_text(size=40, colour='black'),
+        axis.text.y = element_text(size=40, colour='black'),
+        axis.ticks = element_line(colour = "black", size=2),
+        axis.ticks.length = unit(0.3, "cm"),
+        axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank(),
+        panel.border = element_rect(colour = "black", fill=NA, size=2),
+        plot.title = element_text( size=21, face="bold.italic"),
+        plot.margin=unit(c(1,1,-0.5,1), "cm"))
+
+dput(agg_data)
+
+```
