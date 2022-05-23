@@ -1,0 +1,27 @@
+{
+    "id": "1D23B2E9",
+    "path": "~/GitHub/Cellobiose-addition-incubation/Code/GC_MS.R",
+    "project_path": "Code/GC_MS.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1652711080694.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "tempName": "Untitled1",
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "7,26",
+        "scrollLine": "0"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1652927528,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1652927529016,
+    "read_only": false,
+    "read_only_alternatives": []
+}
