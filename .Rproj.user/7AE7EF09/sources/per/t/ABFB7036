@@ -3,7 +3,7 @@
     "path": "~/GitHub/Cellobiose-addition-incubation/Code/1-Enzyme_Activity.R",
     "project_path": "Code/1-Enzyme_Activity.R",
     "type": "r_source",
-    "hash": "3526405257",
+    "hash": "3696182665",
     "contents": "",
     "dirty": false,
     "created": 1652276152843.0,
@@ -17,11 +17,11 @@
         "scrollLine": "0"
     },
     "folds": "",
-    "lastKnownWriteTime": 1652290517,
+    "lastKnownWriteTime": 1653484641,
     "encoding": "UTF-8",
     "collab_server": "",
     "source_window": "",
-    "last_content_update": 1652279413,
+    "last_content_update": 1653484641,
     "read_only": false,
     "read_only_alternatives": []
 }
