@@ -35,7 +35,7 @@ fticr_data_trt = read.csv("data/processed/fticr_polar_trt.csv")
 
 ## SET the treatment variables
 ## this will work with multiple variables too. just add all the variable names in the parentheses.
-TREATMENTS = dplyr::quos(Site, Year, Season)
+TREATMENTS = dplyr::quos(Temp, Treatment)
 
 
 #
@@ -62,107 +62,67 @@ fticr_hcoc =
   fticr_data_trt %>% 
   left_join(dplyr::select(fticr_meta, formula, HC, OC), by = "formula")
 
+
 gg_vk_all = 
-  gg_vankrev(fticr_hcoc, aes(x = OC, y = HC, color = Site))+
+  gg_vankrev(fticr_hcoc, aes(x = OC, y = HC, color = Treatment))+
   stat_ellipse(level = 0.90, show.legend = FALSE)+
-  facet_grid(Season~Year)+
+  facet_grid(~Temp)+
   theme_kp()
 
-gg_vk_all_site = 
-  gg_vankrev(fticr_hcoc, aes(x = OC, y = HC, color = as.character(Year)))+
+gg_vk_all_Temp = 
+  gg_vankrev(fticr_hcoc, aes(x = OC, y = HC, color = as.character(Temp)))+
   stat_ellipse(level = 0.90, show.legend = FALSE)+
-  facet_grid(~Site)+
-  theme_kp()
-
-#
-# spring-late spring, hydric-mesic ----
-fticr_spring2018 = 
-  fticr_hcoc %>% 
-  filter(Site %in% c("Hydric", "Mesic") & Season %in% c("Spring", "LateSpring") & Year == 2018)
-
-gg_vk_spring2018 = 
-  fticr_spring2018 %>% 
-  gg_vankrev(aes(x = OC, y = HC, color = Season))+
-  stat_ellipse(level = 0.90, show.legend = FALSE)+
-  facet_wrap(~Site)+
-  theme_kp()
-# spring-late spring, hydric-mesic ---- Unique peaks
-fticr_spring2018_Unique = 
-  fticr_hcoc %>% 
-  filter(Site %in% c("Hydric", "Mesic") & Season %in% c("Spring", "LateSpring") & Year == 2018) %>%
-  distinct(formula, Site, HC, OC,Season) %>% 
-  group_by(formula) %>% 
-  dplyr::mutate(n = n())
-
-gg_vk_spring2018_Unique = 
-  fticr_spring2018_Unique %>% 
-  gg_vankrev(aes(x = OC, y = HC, color = Season))+
-  stat_ellipse(level = 0.90, show.legend = FALSE)+
-  facet_wrap(~Site)+
+  facet_grid(~Treatment)+
   theme_kp()
 
 #
-# unique peaks, by site ----
-fticr_unique_site = 
+
+
+#
+# unique peaks, by Temp ----
+fticr_unique_Temp = 
   fticr_hcoc %>% 
-  distinct(formula, Site, HC, OC) %>% 
+  distinct(formula, Temp, HC, OC) %>% 
   group_by(formula) %>% 
   dplyr::mutate(n = n())
 
 
-gg_site_unique =
-  fticr_unique_site %>% filter(n == 1) %>% 
-    gg_vankrev(aes(x = OC, y = HC, color = Site))+
+gg_Temp_unique =
+  fticr_unique_Temp %>% filter(n == 1) %>% 
+    gg_vankrev(aes(x = OC, y = HC, color = Temp))+
     stat_ellipse(level = 0.90, show.legend = FALSE)+
-    facet_wrap(~Site)+
-    labs(title = "Unique peaks at each Site")+
+    facet_wrap(~Temp)+
+    labs(title = "Unique peaks at each Temp")+
     theme_kp()
 
 
-gg_site_common = 
-    fticr_unique_site %>% filter(n == 3) %>% 
+gg_Temp_common = 
+    fticr_unique_Temp %>% filter(n == 3) %>% 
     gg_vankrev(aes(x = OC, y = HC))+
     stat_ellipse(level = 0.90, show.legend = FALSE)+
-    labs(title = "Peaks common to all sites")+
+    labs(title = "Peaks common to all Temps")+
     theme_kp()
 
 
 # overlay unique peaks onto common peaks
-gg_site_common_unique = 
-    fticr_unique_site %>% filter(n == 3) %>% 
+gg_Temp_common_unique = 
+    fticr_unique_Temp %>% filter(n == 3) %>% 
     gg_vankrev(aes(x = OC, y = HC))+
-    geom_point(data = fticr_unique_site %>% filter(n == 1),
-               aes(color = Site), alpha = 0.7)+
-    facet_wrap(~Site)+
-    labs(title = "Unique peaks at each Site",
+    geom_point(data = fticr_unique_Temp %>% filter(n == 1),
+               aes(color = Temp), alpha = 0.7)+
+    facet_wrap(~Temp)+
+    labs(title = "Unique peaks at each Temp",
          subtitle = "black/grey = peaks common to all")+
     theme_kp()
 
 
 ## summarize unique peaks
-fticr_unique_site_summary = 
-  fticr_unique_site %>% 
+fticr_unique_Temp_summary = 
+  fticr_unique_Temp %>% 
   filter(n == 1) %>% 
   left_join(fticr_meta %>% dplyr::select(formula, Class)) %>% 
-  group_by(Site, Class) %>% 
+  group_by(Temp, Class) %>% 
   dplyr::summarise(counts = n())
-
-#
-# unique peaks, spring 2018 ----
-# comparing peaks lost/gained for spring vs. latespring
-
-unique_peaks_2018 = 
-  fticr_spring2018 %>% 
-  group_by(formula, Site) %>% 
-  dplyr::mutate(n = n())
-
-unique_peaks_2018 %>% 
-  filter(n == 1) %>% 
-  gg_vankrev(aes(x = OC, y = HC, color = Season))+
-  facet_wrap(~Site)+  
-  stat_ellipse(level = 0.90, show.legend = FALSE)+
-  theme_kp()
-
 
 #
 # 3. relative abundance ---------------------------------------------------
@@ -190,9 +150,9 @@ relabund_trt =
 ## 3b. graphs ----
 
 relabund_trt %>% 
-  ggplot(aes(x = Site, y = rel_abund, fill = Class))+
+  ggplot(aes(x = Class, y = rel_abund, fill = Treatment))+
   geom_bar(stat = "identity")+
-  facet_grid(Season ~ Year)+
+  facet_grid(~Temp)+
   theme_kp()
 
 
@@ -202,11 +162,11 @@ relabund_trt %>%
 ## 4a. PCA ----
 
 # all samples
-pca_hydric = fit_pca_function(relabund_cores)
+pca_1 = fit_pca_function(relabund_cores)
 
-(gg_pca_by_site = 
-  ggbiplot(pca_all$pca_int, obs.scale = 1, var.scale = 1,
-           groups = as.character(pca_all$grp$Site), 
+(gg_pca_by_Temp = 
+  ggbiplot(pca_1$pca_int, obs.scale = 1, var.scale = 1,
+           groups = as.character(pca_1$grp$Temp), 
            ellipse = TRUE, circle = FALSE, var.axes = TRUE, alpha = 0) +
   geom_point(size=3,stroke=1, alpha = 0.5,
              aes(#shape = groups,
@@ -216,106 +176,10 @@ pca_hydric = fit_pca_function(relabund_cores)
   ylim(-3.5,3.5)+
   labs(shape="",
        title = "all samples",
-       subtitle = "separation by Site")+
+       subtitle = "separation by Temp")+
   theme_kp()+
   NULL
 )
-
-
-# Hydric only
-pca_hydric = fit_pca_function(relabund_cores %>% filter(Site == "Hydric"))
-
-(gg_pca_hydric = 
-    ggbiplot(pca_hydric$pca_int, obs.scale = 1, var.scale = 1,
-             groups = as.character(pca_hydric$grp$Season), 
-             ellipse = TRUE, circle = FALSE, var.axes = TRUE, alpha = 0) +
-    geom_point(size=3,stroke=1, alpha = 0.5,
-               aes(shape = as.character(pca_hydric$grp$Year),
-                 color = groups))+
-    #scale_shape_manual(values = c(21, 22, 19), name = "", guide = "none")+
-    xlim(-4,4)+
-    ylim(-3.5,3.5)+
-    labs(shape="",
-         title = "Hydric samples",
-         subtitle = "separation by Season")+
-    theme_kp()+
-    NULL
-)
-
-# Mesic only
-pca_Mesic = fit_pca_function(relabund_cores %>% filter(Site == "Mesic"))
-
-(gg_pca_Mesic = 
-    ggbiplot(pca_Mesic$pca_int, obs.scale = 1, var.scale = 1,
-             groups = as.character(pca_Mesic$grp$Season), 
-             ellipse = TRUE, circle = FALSE, var.axes = TRUE, alpha = 0) +
-    geom_point(size=3,stroke=1, alpha = 0.5,
-               aes(shape = as.character(pca_Mesic$grp$Year),
-                   color = groups))+
-    #scale_shape_manual(values = c(21, 22, 19), name = "", guide = "none")+
-    xlim(-4,4)+
-    ylim(-3.5,3.5)+
-    labs(shape="",
-         title = "Mesic samples",
-         subtitle = "separation by Season")+
-    theme_kp()+
-    NULL
-)
-
-# Xeric only
-pca_Xeric = fit_pca_function(relabund_cores %>% filter(Site == "Xeric"))
-
-(gg_pca_Xeric = 
-    ggbiplot(pca_Xeric$pca_int, obs.scale = 1, var.scale = 1,
-             groups = as.character(pca_Xeric$grp$Season), 
-             ellipse = TRUE, circle = FALSE, var.axes = TRUE, alpha = 0) +
-    geom_point(size=3,stroke=1, alpha = 0.5,
-               aes(shape = as.character(pca_Xeric$grp$Year),
-                   color = groups))+
-    #scale_shape_manual(values = c(21, 22, 19), name = "", guide = "none")+
-    xlim(-4,4)+
-    ylim(-3.5,3.5)+
-    labs(shape="",
-         title = "Xeric samples",
-         subtitle = "separation by Season")+
-    theme_kp()+
-    NULL
-)
-
-# spring vs late spring mesic hydric
-pca_Mesic_SpringLateSpring = fit_pca_function(relabund_cores %>% filter(Site %in% ("Mesic") & Season %in% c("Spring", "LateSpring") & Year == 2018))
-gg_pca_Mesic_Spring_Latespring = 
-    ggbiplot(pca_Mesic_SpringLateSpring$pca_int, obs.scale = 1, var.scale = 1,
-             groups = as.character(pca_Mesic_SpringLateSpring$grp$Season), 
-             ellipse = TRUE, circle = FALSE, var.axes = TRUE, alpha = 0) +
-    geom_point(size=3,stroke=1, alpha = 0.5,
-               aes(shape = as.character(pca_Mesic_SpringLateSpring$grp$Year),
-                   color = groups))+
-    #scale_shape_manual(values = c(21, 22, 19), name = "", guide = "none")+
-    xlim(-4,4)+
-    ylim(-3.5,3.5)+
-    labs(shape="",
-         title = "Mesic samples",
-         subtitle = "separation by Season")+
-    theme_kp()+
-    NULL
-
-pca_Hydric_SpringLateSpring = fit_pca_function(relabund_cores %>% filter(Site %in% ("Hydric") & Season %in% c("Spring", "LateSpring") & Year == 2018))
-gg_pca_Hydric_Spring_Latespring = 
-  ggbiplot(pca_Hydric_SpringLateSpring$pca_int, obs.scale = 1, var.scale = 1,
-           groups = as.character(pca_Hydric_SpringLateSpring$grp$Season), 
-           ellipse = TRUE, circle = FALSE, var.axes = TRUE, alpha = 0) +
-  geom_point(size=3,stroke=1, alpha = 0.5,
-             aes(shape = as.character(pca_Hydric_SpringLateSpring$grp$Year),
-                 color = groups))+
-  #scale_shape_manual(values = c(21, 22, 19), name = "", guide = "none")+
-  xlim(-4,4)+
-  ylim(-3.5,3.5)+
-  labs(shape="",
-       title = "Hydric samples",
-       subtitle = "separation by Season")+
-  theme_kp()+
-  NULL
 
 
 #
@@ -335,8 +199,8 @@ relabund_wide =
 
 # adonis function for PERMANOVA
 permanova_fticr_all = 
-  adonis(relabund_wide %>% dplyr::select(aliphatic:`condensed aromatic`) ~ Site * Year * Season, 
+  adonis2(relabund_wide %>% dplyr::select(aliphatic:`condensed aromatic`) ~ Temp * Treatment, 
          data = relabund_wide) 
 
-# Site, Site:Year were significant (p < 0.05)
-# Site accounted for 72 % of total variation among samples (R2= 0.72)
+# Temp, Temp:Year were significant (p < 0.05)
+# Temp accounted for 72 % of total variation among samples (R2= 0.72)

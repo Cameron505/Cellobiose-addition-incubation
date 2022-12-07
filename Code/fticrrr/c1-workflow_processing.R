@@ -15,15 +15,15 @@
 # 1. SET input file paths -------------------------------
 #This code is set up to process two sets of 
 #For non polar data (Must be COREKEY because that is called directly from the functions)
-COREKEYNonpolar = "data/fticr/Field_NonPolar_Fdata.csv"
-REPORT2 = "data/fticr/xtra_Report_15T_FieldSite_Lower_non-polar_Consolidated.csv"
+COREKEYNonpolar = "data/fticr/CAM2_Fdata.csv"
+REPORT2 = "data/fticr/EUP50209_nonPolar_FTICR.csv"
 
 #FOR POLAR DATA
-COREKEYpolar = "data/fticr/Field_Polar_Fdata.csv"
-REPORT = "data/fticr/xtra_Report_15T_FieldSite_Upper_Polar_Consolidated.csv"
+COREKEYpolar = "data/fticr/CAM_Fdata.csv"
+REPORT = "data/fticr/EUP50209_NOM_Met-SPE_FTICR.csv"
 ## SET the treatment variables
 ## this will work with multiple variables too. just add all the variable names in the parentheses.
-TREATMENTS = dplyr::quos(Site, Year, Season)
+TREATMENTS = dplyr::quos(Temp, Treatment)
 
 #
 # 2. load packages and source the functions --------------------------------------------------------

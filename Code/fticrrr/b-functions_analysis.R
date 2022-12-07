@@ -23,12 +23,12 @@ compute_relabund_cores = function(fticr_data_longform, fticr_meta, TREATMENTS){
     # add the Class column to the data
     left_join(dplyr::select(fticr_meta, formula, Class), by = "formula") %>% 
     # calculate abundance of each Class as the sum of all counts
-    group_by(CoreID, Class, !!!TREATMENTS) %>%
+    group_by(SampleID, Class, !!!TREATMENTS) %>%
     dplyr::summarise(abund = sum(presence)) %>%
     ungroup %>% 
     # create a new column for total counts per core assignment
     # and then calculate relative abundance  
-    group_by(CoreID, !!!TREATMENTS) %>% 
+    group_by(SampleID, !!!TREATMENTS) %>% 
     dplyr::mutate(total = sum(abund),
                   relabund  = round((abund/total)*100,2))
 }
@@ -65,7 +65,7 @@ fit_pca_function = function(dat){
   # first, make wide-form
   relabund_pca=
     dat %>% 
-    filter(!is.na(CoreID)) %>% 
+    filter(!is.na(SampleID)) %>% 
     ungroup %>% 
     dplyr::select(-c(abund, total)) %>% 
     spread(Class, relabund) %>% 

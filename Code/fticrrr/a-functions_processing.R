@@ -71,7 +71,7 @@ assign_class_seidel = function(meta_clean, meta_indices){
 ## for data file
 compute_presence = function(dat){
   dat %>% 
-    pivot_longer(-("Mass"), values_to = "presence", names_to = "CoreID") %>% 
+    pivot_longer(-("Mass"), values_to = "presence", names_to = "SampleID") %>% 
     # convert intensities to presence==1/absence==0  
     dplyr::mutate(presence = if_else(presence>0,1,0)) %>% 
     # keep only peaks present
@@ -82,7 +82,7 @@ apply_replication_filter = function(data_long_key, ...){
     data_long_key %>% 
     ungroup() %>% 
     group_by(!!!TREATMENTS) %>% 
-    distinct(CoreID) %>% 
+    distinct(SampleID) %>% 
     dplyr::summarise(reps = n())
   
   
@@ -106,7 +106,7 @@ make_fticr_meta = function(report){
   meta_clean = 
     fticr_report %>% 
     # select only the relevant columns for the formula assignments
-    dplyr::select(Mass, C, H, O, N, S, P, El_comp, class)
+    dplyr::select(Mass, C, H, O, N, S, P, El_comp, Class)
   
   names(meta_clean)[9]<-"EMSL_class"
   meta_indices = compute_indices(meta_clean)
@@ -126,13 +126,13 @@ make_fticr_data = function(report, COREKEY, TREATMENTS){
   fticr_report = (apply_filter_report(report))
   mass_to_formula = make_fticr_meta(report)$meta_formula
   
-  data_columns = fticr_report %>% dplyr::select(Mass, starts_with("out_Wein_"))
+  data_columns = fticr_report %>% dplyr::select(Mass, starts_with("Weint_"))
   
   data_presence = compute_presence(data_columns) %>% 
     left_join(mass_to_formula, by = "Mass") %>% 
-    dplyr::select(formula, CoreID, presence)
+    dplyr::select(formula, SampleID, presence)
   
-  data_long_key = data_presence %>% left_join(COREKEY, by = "CoreID")
+  data_long_key = data_presence %>% left_join(COREKEY, by = "SampleID")
   
   data_long_key_repfiltered = apply_replication_filter(data_long_key, TREATMENTS)
   
