@@ -168,16 +168,17 @@ pca_1 = fit_pca_function(relabund_cores)
   ggbiplot(pca_1$pca_int, obs.scale = 1, var.scale = 1,
            groups = as.character(pca_1$grp$Temp), 
            ellipse = TRUE, circle = FALSE, var.axes = TRUE, alpha = 0) +
-  geom_point(size=3,stroke=1, alpha = 0.5,
+    geom_point(size=5,stroke=1, alpha = 0.9,
              aes(#shape = groups,
                  color = groups))+
   #scale_shape_manual(values = c(21, 22, 19), name = "", guide = "none")+
   xlim(-4,4)+
   ylim(-3.5,3.5)+
   labs(shape="",
-       title = "all samples",
-       subtitle = "separation by Temp")+
-  theme_kp()+
+       title = "",
+       subtitle = "")+
+    ggtitle("")+
+  theme_CKM()+
   NULL
 )
 
