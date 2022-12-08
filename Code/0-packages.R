@@ -9,7 +9,7 @@ library(ggbiplot) #for PCA biplots
 
 # custom ggplot theme
 cbPalette <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-theme_kp <- function() {  # this for all the elements common across plots
+theme_CKM <- function() {  # this for all the elements common across plots
   theme_bw() %+replace%
     theme(legend.position = "top",
           legend.key=element_blank(),
@@ -20,8 +20,8 @@ theme_kp <- function() {  # this for all the elements common across plots
           panel.border = element_rect(color="black",size=1.5, fill = NA),
           
           plot.title = element_text(hjust = 0, size = 14),
-          axis.text = element_text(size = 14, color = "black"),
-          axis.title = element_text(size = 14, face = "bold", color = "black"),
+          axis.text = element_text(size = 10, color = "black"),
+          axis.title = element_text(size = 15, face = "bold", color = "black"),
           
           # formatting for facets
           panel.background = element_blank(),

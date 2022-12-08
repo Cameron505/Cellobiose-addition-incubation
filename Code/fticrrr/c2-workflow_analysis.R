@@ -162,15 +162,19 @@ relabund_trt %>%
 ## 4a. PCA ----
 
 # all samples
+
 pca_1 = fit_pca_function(relabund_cores)
 
 (gg_pca_by_Temp = 
-  ggbiplot(pca_1$pca_int, obs.scale = 1, var.scale = 1,
+    
+    ggbiplot(pca_1$pca_int, obs.scale = 1, var.scale = 1,
            groups = as.character(pca_1$grp$Temp), 
-           ellipse = TRUE, circle = FALSE, var.axes = TRUE, alpha = 0) +
+           ellipse = TRUE, circle = FALSE, var.axes = TRUE, alpha = 0,varname.size = 3, labels.size=10,) +
     geom_point(size=5,stroke=1, alpha = 0.9,
-             aes(#shape = groups,
+               aes(#shape = groups,
                  color = groups))+
+    update_geom_defaults("text", list(size = 25))+
+    scale_color_manual(values=cbPalette)+
   #scale_shape_manual(values = c(21, 22, 19), name = "", guide = "none")+
   xlim(-4,4)+
   ylim(-3.5,3.5)+
